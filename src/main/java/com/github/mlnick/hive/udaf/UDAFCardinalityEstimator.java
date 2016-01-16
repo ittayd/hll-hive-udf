@@ -258,9 +258,9 @@ public class UDAFCardinalityEstimator implements GenericUDAFResolver2 {
             }
             else if (inputStructOI != null) {
                 // in this case we merge estimators
-                LazyString type = (LazyString) inputStructOI.getStructFieldData(obj, inputStructOI.getStructFieldRef(ESTIMATOR_TYPE));
-                LazyBinary lb = (LazyBinary) inputStructOI.getStructFieldData(obj, inputStructOI.getStructFieldRef(BINARY));
-                ICardinality that = buildEstimator(lb.getWritableObject(), type.toString());
+                String type = inputStructOI.getStructFieldData(obj, inputStructOI.getStructFieldRef(ESTIMATOR_TYPE)).toString();
+                BytesWritable lb = (BytesWritable) inputStructOI.getStructFieldData(obj, inputStructOI.getStructFieldRef(BINARY));
+                ICardinality that = buildEstimator(lb, type);
                 mergeEstimators(that, ceb);
             }
         }
