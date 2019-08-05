@@ -258,8 +258,12 @@ public class UDAFCardinalityEstimator implements GenericUDAFResolver2 {
             }
             else if (inputStructOI != null) {
                 // in this case we merge estimators
-                String type = inputStructOI.getStructFieldData(obj, inputStructOI.getStructFieldRef(ESTIMATOR_TYPE)).toString();
-                BytesWritable lb = (BytesWritable) inputStructOI.getStructFieldData(obj, inputStructOI.getStructFieldRef(BINARY));
+                StructField estimatorTypeRef = inputStructOI.getStructFieldRef(ESTIMATOR_TYPE);
+                PrimitiveObjectInspector estimatorTypeOI = (PrimitiveObjectInspector) estimatorTypeRef.getFieldObjectInspector();
+                String type = (String)estimatorTypeOI.getPrimitiveJavaObject(inputStructOI.getStructFieldData(obj, estimatorTypeRef));
+                StructField binaryRef = inputStructOI.getStructFieldRef(BINARY);
+                PrimitiveObjectInspector binaryOI = (PrimitiveObjectInspector) binaryRef.getFieldObjectInspector();
+                BytesWritable lb = (BytesWritable) binaryOI.getPrimitiveWritableObject(inputStructOI.getStructFieldData(obj, binaryRef));
                 ICardinality that = buildEstimator(lb, type);
                 mergeEstimators(that, ceb);
             }
@@ -332,9 +336,7 @@ public class UDAFCardinalityEstimator implements GenericUDAFResolver2 {
             try {
                 ArrayList<Object> result = new ArrayList<Object>();
                 result.add(new Text(ce.name()));
-                long cardinality = ceb.cardinalityEstimator instanceof HyperLogLog
-                        ? ((HyperLogLog) ceb.cardinalityEstimator).cardinality(/* use long-range estimate */ false)
-                        : ceb.cardinalityEstimator.cardinality();
+                long cardinality = ceb.cardinalityEstimator.cardinality();
                 result.add(new LongWritable(cardinality));
                 result.add(new BytesWritable(ceb.cardinalityEstimator.getBytes()));
                 return result;
